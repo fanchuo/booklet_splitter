@@ -26,6 +26,23 @@ class BookletSplitter(object):
                 return [b_size] * large_booklets + [b_size-4] * adjust
         return []
 
+    @staticmethod
+    def booklet_ordering(constituted_booklets):
+        for pages in constituted_booklets.values():
+            new_pages = []
+            nbPages = len(pages)
+            for rank in range(0, int(nbPages/2)):
+                if rank%2 == 0:
+                    # Recto
+                    new_pages.append(pages[nbPages-1-rank])
+                    new_pages.append(pages[rank])
+                else:
+                    # Verso
+                    new_pages.append(pages[rank])
+                    new_pages.append(pages[nbPages-1-rank])
+            pages.clear()
+            pages.extend(new_pages)
+
 
 class PdfHandler(object):
     def __init__(self, file):
@@ -43,21 +60,53 @@ class PdfHandler(object):
     def close(self):
         self.inputStream.close()
 
-    def write_booklets(self, format_str, booklets_to_process):
+    def fill_booklets(self, format_str, booklets_to_process):
         page_idx = -2
         booklet_curr = 1
+        constituted_booklets = {}
         for s_booklet in booklets_to_process:
-            pdf_writer = PyPDF2.PdfFileWriter()
+            pages = []
+            constituted_booklets[format_str.format(booklet_curr)] = pages
             for booklet_idx in range(0, s_booklet):
                 if page_idx < 0 or page_idx >= self.numPages:
-                    pdf_writer.addBlankPage(self.width, self.height)
+                    pages.append(PyPDF2.pdf.PageObject.createBlankPage(pdf=None, width=self.width, height=self.height))
                 else:
-                    pdf_writer.addPage(self.inputPdf.getPage(page_idx))
+                    pages.append(self.inputPdf.getPage(page_idx))
                 page_idx = page_idx + 1
-            out_stream = open(format_str.format(booklet_curr), mode='wb')
+            booklet_curr = booklet_curr + 1
+        return constituted_booklets
+
+    def merge(self, constituted_booklets):
+        scale = self.width/self.height
+        for pages in constituted_booklets.values():
+            new_pages = []
+            nbPages = len(pages)
+            for rank in range(0, int(nbPages/2)):
+                blank = PyPDF2.pdf.PageObject.createBlankPage(pdf=None, width=self.width, height=self.height)
+                page1 = pages[rank*2]
+                page2 = pages[rank*2 + 1]
+                if rank%2 == 0:
+                    blank.mergeRotatedScaledTranslatedPage(page1, 90, scale, self.width, 0, expand=True)
+                    blank.mergeRotatedScaledTranslatedPage(page2, 90, scale, self.width, self.height/2, expand=True)
+                else:
+                    blank.mergeRotatedScaledTranslatedPage(page1, -90, scale, 0, self.height, expand=True)
+                    blank.mergeRotatedScaledTranslatedPage(page2, -90, scale, 0, self.height/2, expand=True)
+                new_pages.append(blank)
+            pages.clear()
+            pages.extend(new_pages)
+        
+
+    def write_booklets(self, constituted_booklets):
+        for file_name, pages in constituted_booklets.items():
+            pdf_writer = PyPDF2.PdfFileWriter()
+            for page in pages:
+                if page:
+                    pdf_writer.addPage(page)
+                else:
+                    pdf_writer.addBlankPage(self.width, self.height)
+            out_stream = open(file_name, mode='wb')
             pdf_writer.write(out_stream)
             out_stream.close()
-            booklet_curr = booklet_curr + 1
 
 
 if __name__ == '__main__':
@@ -67,4 +116,8 @@ if __name__ == '__main__':
     print(myPages)
     booklets = BookletSplitter.compute_booklets(myPages)
     print(booklets)
-    input_pdf.write_booklets('booklet{0:02d}.pdf', booklets)
+    constituted_booklets = input_pdf.fill_booklets('booklet{0:02d}.pdf', booklets)
+    #print(contituted_booklets)
+    BookletSplitter.booklet_ordering(constituted_booklets)
+    input_pdf.merge(constituted_booklets)
+    input_pdf.write_booklets(constituted_booklets)
