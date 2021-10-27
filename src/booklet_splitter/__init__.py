@@ -2,6 +2,32 @@ from typing import List, Dict
 
 from io import open
 import PyPDF2
+import logging
+from os import makedirs
+from pathlib import Path
+
+log = logging.getLogger(__name__)
+
+def generate_booklets(input_pdf: str, cover: bool = False, layout: bool = False,
+                      min_size: int = 16, max_size: int = 32, target_directory: str = '.') -> None:
+    if max_size % 4 != 0:
+        raise BookletSplitterException(f'max_size = {max_size} is not multiple of 4')
+    if min_size % 4 != 0:
+        raise BookletSplitterException(f'min_size = {min_size} is not multiple of 4')
+    input_pdf = PdfHandler(input_pdf)
+    log.info(input_pdf)
+    my_pages = compute_effective_pages(input_pdf.numPages, cover)
+    booklets = compute_booklets(my_pages, min_size, max_size)
+    log.info(f'Computed booklets : {booklets}')
+    constituted_booklets = input_pdf.fill_booklets('booklet{0:02d}.pdf', booklets, cover)
+    log.info('Booklets splitted')
+    if layout:
+        booklet_ordering(constituted_booklets)
+        input_pdf.merge(constituted_booklets)
+        log.info('Printing layout applied')
+    input_pdf.write_booklets(constituted_booklets, target_directory)
+    log.info('Done')
+
 
 def compute_effective_pages(pages: int, cover: bool) -> int:
     to_return = pages
@@ -41,6 +67,8 @@ def booklet_ordering(constituted_booklets: Dict[str, List[PyPDF2.pdf.PageObject]
         pages.clear()
         pages.extend(new_pages)
 
+class BookletSplitterException(Exception):
+    pass
 
 class PdfHandler(object):
     def __init__(self, file):
@@ -68,7 +96,8 @@ class PdfHandler(object):
         constituted_booklets = {}
         for s_booklet in booklets_to_process:
             pages = []
-            constituted_booklets[format_str.format(booklet_curr)] = pages
+            booklet_name = format_str.format(booklet_curr)
+            constituted_booklets[booklet_name] = pages
             for booklet_idx in range(0, s_booklet):
                 if page_idx < 0 or page_idx >= self.numPages:
                     pages.append(PyPDF2.pdf.PageObject.createBlankPage(pdf=None, width=self.width, height=self.height))
@@ -76,11 +105,12 @@ class PdfHandler(object):
                     pages.append(self.inputPdf.getPage(page_idx))
                 page_idx = page_idx + 1
             booklet_curr = booklet_curr + 1
+            log.debug(f'Booklet created : {booklet_name}')
         return constituted_booklets
 
     def merge(self, constituted_booklets: Dict[str, List[PyPDF2.pdf.PageObject]]) -> None:
         scale = self.width / self.height
-        for pages in constituted_booklets.values():
+        for booklet_name, pages in constituted_booklets.items():
             new_pages = []
             nb_pages = len(pages)
             for rank in range(0, int(nb_pages / 2)):
@@ -96,8 +126,14 @@ class PdfHandler(object):
                 new_pages.append(blank)
             pages.clear()
             pages.extend(new_pages)
+            log.debug(f'Booklet layout applied : {booklet_name}')
 
-    def write_booklets(self, constituted_booklets: Dict[str, List[PyPDF2.pdf.PageObject]]) -> None:
+
+    def write_booklets(self,
+                       constituted_booklets: Dict[str, List[PyPDF2.pdf.PageObject]],
+                       target_directory: str = '.') -> None:
+        makedirs(target_directory, exist_ok=True)
+        p = Path(target_directory)
         for file_name, pages in constituted_booklets.items():
             pdf_writer = PyPDF2.PdfFileWriter()
             for page in pages:
@@ -105,6 +141,6 @@ class PdfHandler(object):
                     pdf_writer.addPage(page)
                 else:
                     pdf_writer.addBlankPage(self.width, self.height)
-            out_stream = open(file_name, mode='wb')
-            pdf_writer.write(out_stream)
-            out_stream.close()
+            with (p/file_name).open(mode='wb') as out_stream:
+                pdf_writer.write(out_stream)
+            log.debug(f'Booklet written pdf format : {file_name}')
