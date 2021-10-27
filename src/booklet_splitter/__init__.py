@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 def generate_booklets(input_pdf: str,
                       cover: bool = False,
                       layout: bool = False,
-                      min_size: int = 16,
                       max_size: int = 32,
                       target_directory: str = '.') -> None:
     """
@@ -25,13 +24,12 @@ def generate_booklets(input_pdf: str,
         to be able to paste a over on the final book
     :param layout: If True, applies the booklet printing layout to your
         output PDF files
-    :param min_size: Minimum size of a booklet
     :param max_size: Maximum size of a booklet
     :param target_directory: Directory where the output PDF will be written
     """
     with PdfHandler(input_pdf) as pdf_handler:
         constituted_booklets = pdf_handler.compute_booklets(
-            cover, min_size, max_size)
+            cover, max_size)
         if layout:
             constituted_booklets.apply_layout()
         constituted_booklets.write_booklets(target_directory)
@@ -167,24 +165,22 @@ class PdfHandler(object):
     def compute_booklets(
             self,
             cover: bool = False,
-            min_size: int = 16,
             max_size: int = 32) -> BookletsCollection:
         """
         :param cover: If True, adds blank pages at the beginning and the end,
             to paste a cover on the book
-        :param min_size: Min booklet size
         :param max_size: Max booklet size
         :return: A collection of output booklets
         """
         if max_size % 4 != 0:
             raise BookletSplitterException(
                 f'max_size = {max_size} is not multiple of 4')
-        if min_size % 4 != 0:
+        if max_size <= 0:
             raise BookletSplitterException(
-                f'min_size = {min_size} is not multiple of 4')
+                f'max_size = {max_size} should be strictly positive')
         log.info(self)
         my_pages = self._compute_effective_pages(self.num_pages, cover)
-        booklets = self._compute_booklet_sizes(my_pages, min_size, max_size)
+        booklets = self._compute_booklet_sizes(my_pages, max_size)
         log.info(f'Computed booklets : {booklets}')
         constituted_booklets = self._fill_booklets(
             'booklet{0:02d}.pdf', booklets, cover)
@@ -209,14 +205,18 @@ class PdfHandler(object):
 
     @staticmethod
     def _compute_booklet_sizes(
-            effective_pages: int, min_size: int, max_size: int) -> List[int]:
+            effective_pages: int, max_size: int) -> List[int]:
         """
         :param effective_pages: Total number of pages,
             computed for all the booklets
-        :param min_size: Min booklet size
         :param max_size: Max booklet size
         :return: The list of booklets sizes to be used for split
         """
+        min_size = ((max_size // 2) // 4) * 4
+        if min_size > 0:
+            min_size -= 1
+        log.debug(f'Computed min size : {min_size}')
+
         for b_size in range(max_size, min_size, -4):
             nb_booklets = effective_pages // b_size
             rest = effective_pages % b_size
