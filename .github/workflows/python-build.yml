@@ -18,6 +18,7 @@ jobs:
       run: ./bin/build.sh cover
   package:
     runs-on: ubuntu-20.04
+    needs: [checks]
     steps:
     - name: Package
       run: ./bin/build.sh package
