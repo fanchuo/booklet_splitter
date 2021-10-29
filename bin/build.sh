@@ -8,8 +8,10 @@ if [ ! -d venv ] ; then
 fi
 
 source venv/bin/activate
-pip install -r requirements.txt
-pip install -e .[tests]
+if ! pip show --quiet booklet_splitter ; then
+  pip install -r requirements.txt
+  pip install -e .[tests]
+fi
 
 while [ $# -gt 0 ] ; do
   case "$1" in

@@ -2,8 +2,8 @@ name: Build and check python
 on:
   workflow_dispatch:
 jobs:
-  package:
-    runs-on: ubuntu-latest
+  checks:
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -16,3 +16,8 @@ jobs:
       run: ./bin/build.sh black-check flake8
     - name: Tests
       run: ./bin/build.sh cover
+  package:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Package
+      run: ./bin/build.sh package
