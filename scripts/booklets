@@ -4,24 +4,42 @@ import argparse
 import booklet_splitter
 import logging
 
-parser = argparse.ArgumentParser(description='For a given pdf, builds booklets'
-                                             ' to be printed, folded and '
-                                             'eventualy assembled as a book')
-parser.add_argument('input_pdf', type=str, nargs=1,
-                    help='PDF file to be sliced as booklets')
-parser.add_argument('--max_size', type=int, default=32,
-                    help='Max size for a booklet, must be multiple of 4')
-parser.add_argument('--log', type=str, default='INFO',
-                    help='Log level at execution')
-parser.add_argument('--targetdir', type=str, default='.',
-                    help='Directory where the booklets PDF are written')
-parser.add_argument('--no-layout', dest='layout', action='store_false',
-                    default=True, help='Only splits your document in booklets')
-parser.add_argument('--cover', dest='cover', action='store_true',
-                    help='Adds a page at the very beginning and at the very '
-                         'end, to paste a cover')
+parser = argparse.ArgumentParser(
+    description="For a given pdf, builds booklets to be printed, "
+                "folded and eventualy assembled as a book"
+)
+parser.add_argument(
+    "input_pdf", type=str, nargs=1, help="PDF file to be sliced as booklets"
+)
+parser.add_argument(
+    "--max_size",
+    type=int,
+    default=32,
+    help="Max size for a booklet, must be multiple of 4",
+)
+parser.add_argument("--log", type=str, default="INFO", help="Log level at execution")
+parser.add_argument(
+    "--targetdir",
+    type=str,
+    default=".",
+    help="Directory where the booklets PDF are written",
+)
+parser.add_argument(
+    "--no-layout",
+    dest="layout",
+    action="store_false",
+    default=True,
+    help="Only splits your document in booklets",
+)
+parser.add_argument(
+    "--cover",
+    dest="cover",
+    action="store_true",
+    help="Adds a page at the very beginning and at the very " "end, to paste a cover",
+)
 args = parser.parse_args()
 logging.basicConfig(level=logging.getLevelName(args.log))
 
 booklet_splitter.generate_booklets(
-    args.input_pdf[0], args.cover, args.layout, args.max_size, args.targetdir)
+    args.input_pdf[0], args.cover, args.layout, args.max_size, args.targetdir
+)
