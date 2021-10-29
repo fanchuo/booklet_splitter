@@ -6,7 +6,7 @@ import logging
 
 parser = argparse.ArgumentParser(
     description="For a given pdf, builds booklets to be printed, "
-                "folded and eventualy assembled as a book"
+    "folded and eventualy assembled as a book"
 )
 parser.add_argument(
     "input_pdf", type=str, nargs=1, help="PDF file to be sliced as booklets"
