@@ -15,8 +15,8 @@ log = logging.getLogger(__name__)
 
 def generate_booklets(input_pdf: str,
                       cover: bool = False,
-                      layout: bool = False,
-                      max_size: int = 32,
+                      layout: bool = True,
+                      max_size: int=32,
                       target_directory: str = '.') -> None:
     """
     :param input_pdf: File name of the large PDF to be printed as a book

@@ -15,3 +15,20 @@ Print black and white
 ```bash
 lpr -o saturation=percent <file>
 ```
+
+Install pdftotext and pdfseparate utilities
+```bash
+apt install poppler-utils
+```
+
+Obtain coverage tests reports:
+```bash
+coverage run setup.py test
+coverage report
+coverage html
+```
+
+Dev mode:
+```bash
+pip install -e .[tests]
+```
