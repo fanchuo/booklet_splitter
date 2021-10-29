@@ -84,3 +84,13 @@ booklet02.pdf
 8
 9
 10""")
+
+    @unittest.expectedFailure
+    def test_not_multiple4(self):
+        with TemporaryDirectory() as tmp:
+            booklet_splitter.generate_booklets(input_pdf=pdf_path, target_directory=str(tmp), max_size=7)
+
+    @unittest.expectedFailure
+    def test_not_positive(self):
+        with TemporaryDirectory() as tmp:
+            booklet_splitter.generate_booklets(input_pdf=pdf_path, target_directory=str(tmp), max_size=0)

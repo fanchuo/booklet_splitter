@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 def generate_booklets(input_pdf: str,
                       cover: bool = False,
                       layout: bool = True,
-                      max_size: int=32,
+                      max_size: int = 32,
                       target_directory: str = '.') -> None:
     """
     :param input_pdf: File name of the large PDF to be printed as a book
@@ -127,10 +127,7 @@ class BookletsCollection(object):
         for file_name, pages in self.constituted_booklets.items():
             pdf_writer = PyPDF2.PdfFileWriter()
             for page in pages:
-                if page:
-                    pdf_writer.addPage(page)
-                else:
-                    pdf_writer.addBlankPage(self.width, self.height)
+                pdf_writer.addPage(page)
             with (p/file_name).open(mode='wb') as out_stream:
                 pdf_writer.write(out_stream)
             log.debug(f'Booklet written pdf format : {file_name}')
