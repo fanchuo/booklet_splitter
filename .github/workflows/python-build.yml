@@ -1,6 +1,6 @@
 name: Build and check python 
 on:
-  workflow_dispatch:
+  push:
 jobs:
   checks:
     runs-on: ubuntu-20.04
@@ -20,5 +20,10 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [checks]
     steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
     - name: Package
       run: ./bin/build.sh package
