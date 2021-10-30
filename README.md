@@ -1,3 +1,15 @@
+# Booklet splitting tool
+
+[![codecov](https://codecov.io/gh/fanchuo/booklet_splitter/branch/master/graph/badge.svg?token=A5DS31YRIC)](https://codecov.io/gh/fanchuo/booklet_splitter)
+![Build pass](https://github.com/fanchuo/booklet_splitter/actions/workflows/python-build.yml/badge.svg)
+
+For a given large PDF file, bind a book.
+
+### Installation
+
+### Usage
+
+### Useful commands to print pdf files
 For a given pdf, print odd/even pages:
 ```bash
 lpr -o page-set=odd <file>
@@ -14,21 +26,4 @@ lpr -o sides=two-sided-short-edge <file>
 Print black and white
 ```bash
 lpr -o saturation=percent <file>
-```
-
-Install pdftotext and pdfseparate utilities
-```bash
-apt install poppler-utils
-```
-
-Obtain coverage tests reports:
-```bash
-coverage run setup.py test
-coverage report
-coverage html
-```
-
-Dev mode:
-```bash
-pip install -e .[tests]
 ```

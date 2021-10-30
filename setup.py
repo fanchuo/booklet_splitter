@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_namespace_packages
+from os import getenv
 
 setup(
     name="booklet_splitter",
-    version="1.0",
+    version=getenv('VERSION', 'dev'),
     description="Make booklets out of pdf files",
     author="François Sécherre",
     author_email="secherre.nospam@gmail.com",
