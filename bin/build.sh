@@ -40,15 +40,15 @@ while [ $# -gt 0 ] ; do
       coverage xml
       ;;
     flake8)
-      ensure_installed
+      ensure_installed_tests
       flake8 src/ tests/ scripts/booklets
       ;;
     black-check)
-      ensure_installed
+      ensure_installed_tests
       black --check src/ tests/ scripts/booklets
       ;;
     black)
-      ensure_installed
+      ensure_installed_tests
       black src/ tests/ scripts/booklets
       ;;
   esac
