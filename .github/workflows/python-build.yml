@@ -16,6 +16,13 @@ jobs:
       run: ./bin/build.sh black-check flake8
     - name: Tests
       run: ./bin/build.sh cover
+    - uses: codecov/codecov-action@v2
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+        files: ./coverage.xml
+        flags: unittests # optional
+        fail_ci_if_error: true # optional (default = false)
+        verbose: true # optional (default = false)
   package:
     runs-on: ubuntu-20.04
     needs: [checks]

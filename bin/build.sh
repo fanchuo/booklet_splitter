@@ -13,6 +13,12 @@ if ! pip show --quiet wheel ; then
 fi
 ensure_installed() {
   if ! pip show --quiet booklet_splitter ; then
+    pip install -e .
+  fi
+}
+
+ensure_installed_tests() {
+  if ! pip show --quiet flake8 ; then
     pip install -e .[tests]
   fi
 }
@@ -27,10 +33,11 @@ while [ $# -gt 0 ] ; do
       python setup.py bdist_wheel
       ;;
     cover)
-      ensure_installed
+      ensure_installed_tests
       coverage run setup.py test
       coverage report
       coverage html
+      coverage xml
       ;;
     flake8)
       ensure_installed

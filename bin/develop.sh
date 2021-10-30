@@ -19,7 +19,9 @@ if [ ! -d "$ROOT_DIR"/venv ] ; then
 fi
 
 source "$VENV_DIR"/bin/activate
-if ! pip show --quiet booklet_splitter ; then
+if ! pip show --quiet wheel ; then
   pip install -r "$ROOT_DIR"/requirements.txt
+fi
+if ! pip show --quiet booklet_splitter ; then
   pip install -e "$ROOT_DIR"[tests]
 fi
