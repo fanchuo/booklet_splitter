@@ -4,6 +4,10 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-20.04
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -25,6 +29,12 @@ jobs:
         flags: unittests # optional
         fail_ci_if_error: true # optional (default = false)
         verbose: true # optional (default = false)
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: 'python'
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
   package:
     runs-on: ubuntu-20.04
     needs: [checks]
