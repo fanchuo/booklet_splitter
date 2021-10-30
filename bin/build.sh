@@ -3,11 +3,6 @@
 set -eu
 cd $(dirname "$0")
 cd ..
-if [ ! -d venv ] ; then
-  python3 -m venv venv
-fi
-
-source venv/bin/activate
 if ! pip show --quiet wheel ; then
   pip install -r requirements.txt
 fi
