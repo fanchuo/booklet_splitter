@@ -36,3 +36,8 @@ jobs:
         python-version: '3.8'
     - name: Package
       run: ./bin/build.sh package
+    - name: Publish
+      if: startsWith(github.ref, 'refs/tags/')
+      env:
+        PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      run: ./bin/build.sh publish

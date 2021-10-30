@@ -23,6 +23,14 @@ ensure_installed_tests() {
   fi
 }
 
+export VERSION=""
+if [ ! -z "${GITHUB_REF+x}" ] ; then
+  VERSION=$(echo "$GITHUB_REF" | sed -n -e 's/^refs\/tags\/v\([0-9]\+[.0-9]*\)$/\1/ p')
+fi
+if [ -z "$VERSION" ] ; then
+  VERSION=dev
+fi
+
 while [ $# -gt 0 ] ; do
   case "$1" in
     test)
@@ -31,6 +39,13 @@ while [ $# -gt 0 ] ; do
       ;;
     package)
       python setup.py bdist_wheel
+      ;;
+    publish)
+      ensure_installed_tests
+      export TWINE_USERNAME="__token__"
+      export TWINE_PASSWORD="$PYPI_API_TOKEN"
+      export TWINE_NON_INTERACTIVE=1
+      twine upload dist/*
       ;;
     cover)
       ensure_installed_tests
