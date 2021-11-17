@@ -22,7 +22,7 @@ setup(
         "PyPDF2==1.26.0",
         "click==8.0.3",
     ],
-    scripts=["scripts/booklets"],
+    scripts=["scripts/pdf_splitter"],
     extras_require={
         "tests": [
             "coverage==6.0.2",

@@ -2,7 +2,7 @@
 For a given large PDF file, this package provides tools
 to prepare booklets to bind a book
 """
-from typing import List, Dict
+from typing import List, Dict, Iterable
 
 from io import open
 import PyPDF2
@@ -33,6 +33,22 @@ def generate_booklets(
         constituted_booklets = pdf_handler.compute_booklets(cover, max_size)
         if layout:
             constituted_booklets.apply_layout()
+        constituted_booklets.write_booklets(target_directory)
+    log.info("Done")
+
+
+def generate_volumes(
+    input_pdf: str,
+    splits: Iterable[int],
+    target_directory: str = ".",
+) -> None:
+    """
+    :param input_pdf: File name of the large PDF to be printed as a book
+    :param splits: Page index where to start a new volume
+    :param target_directory: Directory where the output PDF will be written
+    """
+    with PdfHandler(input_pdf) as pdf_handler:
+        constituted_booklets = pdf_handler.compute_volumes(splits)
         constituted_booklets.write_booklets(target_directory)
     log.info("Done")
 
@@ -164,11 +180,6 @@ class PdfHandler(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.input_stream.close()
 
-    def __str__(self):
-        return "[PdfHandler - numPages : {0} - width : {1} - height : {2}]".format(
-            self.num_pages, self.width, self.height
-        )
-
     def compute_booklets(
         self, cover: bool = False, max_size: int = 32
     ) -> BookletsCollection:
@@ -186,7 +197,6 @@ class PdfHandler(object):
             raise BookletSplitterException(
                 f"max_size = {max_size} should be strictly positive"
             )
-        log.info(self)
         my_pages = self._compute_effective_pages(self.num_pages, cover)
         booklets = self._compute_booklet_sizes(my_pages, max_size)
         log.info(f"Computed booklets : {booklets}")
@@ -194,6 +204,33 @@ class PdfHandler(object):
             "booklet{0:02d}.pdf", booklets, cover
         )
         log.info("Booklets splitted")
+        return BookletsCollection(constituted_booklets, self.width, self.height)
+
+    def compute_volumes(self, splits: Iterable[int]) -> BookletsCollection:
+        """
+        :param splits: Page index where to start a new volume
+        :return: A collection of output volumes
+        """
+        log.info(f"Computed volumes : {splits}")
+        page_index = 0
+        volume_index = 1
+        constituted_booklets = dict()
+        s = sorted(splits)
+        for split in s:
+            limit = min(self.num_pages, split)
+            pages = []
+            constituted_booklets["volume{0:02d}.pdf".format(volume_index)] = pages
+            while page_index < limit:
+                pages.append(self.input_pdf.getPage(page_index))
+                page_index += 1
+            volume_index += 1
+
+        pages = []
+        constituted_booklets["volume{0:02d}.pdf".format(volume_index)] = pages
+        while page_index < self.num_pages:
+            pages.append(self.input_pdf.getPage(page_index))
+            page_index += 1
+        log.info("Volumes splitted")
         return BookletsCollection(constituted_booklets, self.width, self.height)
 
     @staticmethod

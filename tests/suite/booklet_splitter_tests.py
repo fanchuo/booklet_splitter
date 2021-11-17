@@ -106,6 +106,30 @@ booklet02.pdf
 10""",
         )
 
+    def test_volumes(self):
+        with TemporaryDirectory() as tmp:
+            booklet_splitter.generate_volumes(
+                input_pdf=pdf_path, target_directory=str(tmp), splits=[4]
+            )
+            split_result = analyze_split(tmp)
+
+        self.assertEqual(
+            split_result,
+            """volume01.pdf
+1
+2
+3
+4
+
+volume02.pdf
+5
+6
+7
+8
+9
+10""",
+        )
+
     @unittest.expectedFailure
     def test_not_multiple4(self):
         with TemporaryDirectory() as tmp:

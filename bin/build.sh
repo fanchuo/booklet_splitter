@@ -51,15 +51,15 @@ while [ $# -gt 0 ] ; do
       ;;
     flake8)
       ensure_installed_tests
-      flake8 src/ tests/ scripts/booklets
+      flake8 src/ tests/ scripts/pdf_splitter
       ;;
     black-check)
       ensure_installed_tests
-      black --check src/ tests/ scripts/booklets
+      black --check src/ tests/ scripts/pdf_splitter
       ;;
     black)
       ensure_installed_tests
-      black src/ tests/ scripts/booklets
+      black src/ tests/ scripts/pdf_splitter
       ;;
   esac
   shift

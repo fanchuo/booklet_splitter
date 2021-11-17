@@ -1,11 +1,18 @@
 #!/usr/bin/env python
+from typing import Tuple
 
 import click
 import booklet_splitter
 import logging
 
 
-@click.command(
+@click.group()
+@click.option("--log", default="INFO", show_default=True, help="Log level at execution")
+def cli(log: str):
+    logging.basicConfig(level=logging.getLevelName(log))
+
+
+@cli.command(
     help="For a given pdf, builds booklets to be printed, "
     "folded and eventualy assembled as a book"
 )
@@ -16,7 +23,6 @@ import logging
     show_default=True,
     help="Max size for a booklet, must be multiple of 4",
 )
-@click.option("--log", default="INFO", show_default=True, help="Log level at execution")
 @click.option(
     "--targetdir",
     default=".",
@@ -37,12 +43,21 @@ import logging
     show_default=True,
     help="Adds a page at the very beginning and at the very end, to paste a cover",
 )
-@click.argument("input_pdf")
-def cmd(
-    max_size: int, input_pdf: str, log: str, targetdir: str, layout: bool, cover: bool
-):
-    logging.basicConfig(level=logging.getLevelName(log))
+def booklets(max_size: int, input_pdf: str, targetdir: str, layout: bool, cover: bool):
     booklet_splitter.generate_booklets(input_pdf, cover, layout, max_size, targetdir)
 
 
-cmd()
+@cli.command()
+@click.option(
+    "--targetdir",
+    default=".",
+    show_default=True,
+    help="Directory where the booklets PDF are written",
+)
+@click.argument("input_pdf")
+@click.argument("limits", type=int, nargs=-1)
+def volumes(targetdir: str, input_pdf: str, limits: Tuple[int]):
+    booklet_splitter.generate_volumes(input_pdf, limits, targetdir)
+
+
+cli()
