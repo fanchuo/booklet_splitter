@@ -1,4 +1,4 @@
-name: Build and check python 
+name: Build and check python
 on:
   push:
 jobs:
@@ -17,7 +17,7 @@ jobs:
     - name: Install tools
       run: sudo apt-get install -y poppler-utils
     - name: Linter
-      run: ./bin/build.sh black-check flake8
+      run: ./bin/build.sh black-check flake8 mypy
     - name: Tests
       run: ./bin/build.sh cover
     - uses: codecov/codecov-action@v2

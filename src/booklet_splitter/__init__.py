@@ -5,7 +5,7 @@ to prepare booklets to bind a book
 from typing import List, Dict, Iterable
 
 from io import open
-import PyPDF2
+import PyPDF2  # type: ignore
 import logging
 from os import makedirs
 from pathlib import Path
@@ -38,9 +38,7 @@ def generate_booklets(
 
 
 def generate_volumes(
-    input_pdf: str,
-    splits: Iterable[int],
-    target_directory: str = ".",
+    input_pdf: str, splits: Iterable[int], target_directory: str = "."
 ) -> None:
     """
     :param input_pdf: File name of the large PDF to be printed as a book
@@ -216,6 +214,7 @@ class PdfHandler(object):
         volume_index = 1
         constituted_booklets = dict()
         s = sorted(splits)
+        pages: List[PyPDF2.pdf.PageObject]
         for split in s:
             limit = min(self.num_pages, split)
             pages = []
@@ -289,7 +288,7 @@ class PdfHandler(object):
         booklet_curr = 1
         constituted_booklets = {}
         for s_booklet in booklets_to_process:
-            pages = []
+            pages: List[PyPDF2.pdf.PageObject] = []
             booklet_name = format_str.format(booklet_curr)
             constituted_booklets[booklet_name] = pages
             for booklet_idx in range(0, s_booklet):
