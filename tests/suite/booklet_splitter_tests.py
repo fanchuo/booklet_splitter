@@ -1,7 +1,7 @@
 import unittest
 import importlib.resources
 from .. import resources
-from booklet_splitter import booklets, volumes, grayscale
+from booklet_splitter import booklets, volumes
 from tempfile import TemporaryDirectory
 import logging
 from os import listdir
@@ -126,17 +126,6 @@ volume02.pdf
 8
 9
 10""",
-        )
-
-    def test_grayscale(self):
-        with TemporaryDirectory() as tmp:
-            out = str(Path(tmp) / "output.pdf")
-            grayscale.grayscale(input_pdf=pdf_path, output_pdf=out)
-            split_result = analyze_split(tmp)
-
-        self.assertEqual(
-            split_result,
-            "output.pdf",
         )
 
     @unittest.expectedFailure

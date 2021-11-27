@@ -22,7 +22,6 @@ setup(
     install_requires=[
         "PyPDF2==1.26.0",
         "click==8.0.3",
-        "pdf2image==1.16.0",
     ],
     scripts=["scripts/pdf_splitter"],
     extras_require={
