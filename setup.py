@@ -19,7 +19,11 @@ setup(
     url="https://github.com/fanchuo/booklet_splitter",
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
-    install_requires=["PyPDF2==1.26.0", "click==8.0.3"],
+    install_requires=[
+        "PyPDF2==1.26.0",
+        "click==8.0.3",
+        "pdf2image==1.16.0",
+    ],
     scripts=["scripts/pdf_splitter"],
     extras_require={
         "tests": [

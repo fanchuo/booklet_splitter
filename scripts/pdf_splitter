@@ -2,7 +2,8 @@
 from typing import Tuple
 
 import click
-import booklet_splitter
+import booklet_splitter.booklets
+import booklet_splitter.volumes
 import logging
 
 
@@ -43,11 +44,14 @@ def cli(log: str):
     show_default=True,
     help="Adds a page at the very beginning and at the very end, to paste a cover",
 )
+@click.argument("input_pdf")
 def booklets(max_size: int, input_pdf: str, targetdir: str, layout: bool, cover: bool):
-    booklet_splitter.generate_booklets(input_pdf, cover, layout, max_size, targetdir)
+    booklet_splitter.booklets.generate_booklets(
+        input_pdf, cover, layout, max_size, targetdir
+    )
 
 
-@cli.command()
+@cli.command(help="Simply splits a large PDF in smaller PDFs")
 @click.option(
     "--targetdir",
     default=".",
@@ -57,7 +61,7 @@ def booklets(max_size: int, input_pdf: str, targetdir: str, layout: bool, cover:
 @click.argument("input_pdf")
 @click.argument("limits", type=int, nargs=-1)
 def volumes(targetdir: str, input_pdf: str, limits: Tuple[int]):
-    booklet_splitter.generate_volumes(input_pdf, limits, targetdir)
+    booklet_splitter.volumes.generate_volumes(input_pdf, limits, targetdir)
 
 
 cli()

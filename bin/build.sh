@@ -44,7 +44,7 @@ while [ $# -gt 0 ] ; do
       ;;
     cover)
       ensure_installed_tests
-      coverage run setup.py test
+      coverage run --source src/ setup.py test
       coverage report
       coverage html
       coverage xml
