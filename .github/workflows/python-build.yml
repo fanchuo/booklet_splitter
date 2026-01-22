@@ -3,7 +3,7 @@ on:
   push:
 jobs:
   checks:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: read
@@ -13,7 +13,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.10'
     - name: Install tools
       run: sudo apt-get install -y poppler-utils
     - name: Linter
@@ -34,14 +34,14 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
   package:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     needs: [checks]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.10'
     - name: Package
       run: ./bin/build.sh package
     - name: Publish

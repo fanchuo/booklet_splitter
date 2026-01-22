@@ -1,7 +1,7 @@
 import logging
 from typing import Iterable, List
 from booklet_splitter import PdfHandler, BookletsCollection
-import PyPDF2  # type: ignore
+import pypdf
 
 log = logging.getLogger(__name__)
 
@@ -33,20 +33,20 @@ def _compute_volumes(
     volume_index = 1
     constituted_booklets = dict()
     s = sorted(splits)
-    pages: List[PyPDF2.pdf.PageObject]
+    pages: List[pypdf.PageObject]
     for split in s:
         limit = min(pdf_handler.num_pages, split)
         pages = []
         constituted_booklets["volume{0:02d}.pdf".format(volume_index)] = pages
         while page_index < limit:
-            pages.append(pdf_handler.input_pdf.getPage(page_index))
+            pages.append(pdf_handler.input_pdf.pages[page_index])
             page_index += 1
         volume_index += 1
 
     pages = []
     constituted_booklets["volume{0:02d}.pdf".format(volume_index)] = pages
     while page_index < pdf_handler.num_pages:
-        pages.append(pdf_handler.input_pdf.getPage(page_index))
+        pages.append(pdf_handler.input_pdf.pages[page_index])
         page_index += 1
     log.info("Volumes splitted")
     return BookletsCollection(

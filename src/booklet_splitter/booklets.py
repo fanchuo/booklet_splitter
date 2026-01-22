@@ -1,6 +1,8 @@
 import logging
 from typing import List, Dict
-import PyPDF2  # type: ignore
+import pypdf
+from pypdf import Transformation
+
 from booklet_splitter import PdfHandler, BookletsCollection, BookletSplitterException
 
 log = logging.getLogger(__name__)
@@ -102,7 +104,7 @@ def _fill_booklets(
     format_str: str,
     booklets_to_process: List[int],
     cover: bool,
-) -> Dict[str, List[PyPDF2.pdf.PageObject]]:
+) -> Dict[str, List[pypdf.PageObject]]:
     """
     :param pdf_handler: Refers input PDF data
     :param format_str: Template for the booklet name
@@ -118,18 +120,18 @@ def _fill_booklets(
     booklet_curr = 1
     constituted_booklets = {}
     for s_booklet in booklets_to_process:
-        pages: List[PyPDF2.pdf.PageObject] = []
+        pages: List[pypdf.PageObject] = []
         booklet_name = format_str.format(booklet_curr)
         constituted_booklets[booklet_name] = pages
         for booklet_idx in range(0, s_booklet):
             if page_idx < 0 or page_idx >= pdf_handler.num_pages:
                 pages.append(
-                    PyPDF2.pdf.PageObject.createBlankPage(
+                    pypdf.PageObject.create_blank_page(
                         pdf=None, width=pdf_handler.width, height=pdf_handler.height
                     )
                 )
             else:
-                pages.append(pdf_handler.input_pdf.getPage(page_idx))
+                pages.append(pdf_handler.input_pdf.pages[page_idx])
             page_idx = page_idx + 1
         booklet_curr = booklet_curr + 1
         log.debug(f"Booklet created : {booklet_name}")
@@ -177,25 +179,41 @@ def _merge(booklets: BookletsCollection) -> None:
         new_pages = []
         nb_pages = len(pages)
         for rank in range(0, int(nb_pages / 2)):
-            blank = PyPDF2.pdf.PageObject.createBlankPage(
+            blank = pypdf.PageObject.create_blank_page(
                 pdf=None, width=booklets.width, height=booklets.height
             )
             page1 = pages[rank * 2]
             page2 = pages[rank * 2 + 1]
             if rank % 2 == 0:
-                blank.mergeRotatedScaledTranslatedPage(
-                    page1, 90, scale, booklets.width, 0, expand=True
+                page1.add_transformation(
+                    Transformation()
+                    .rotate(90)
+                    .scale(scale)
+                    .translate(booklets.width, 0)
                 )
-                blank.mergeRotatedScaledTranslatedPage(
-                    page2, 90, scale, booklets.width, booklets.height / 2, expand=True
+                blank.merge_page(page1, expand=True)
+                page2.add_transformation(
+                    Transformation()
+                    .rotate(90)
+                    .scale(scale)
+                    .translate(booklets.width, booklets.height / 2)
                 )
+                blank.merge_page(page2, expand=True)
             else:
-                blank.mergeRotatedScaledTranslatedPage(
-                    page1, -90, scale, 0, booklets.height, expand=True
+                page1.add_transformation(
+                    Transformation()
+                    .rotate(-90)
+                    .scale(scale)
+                    .translate(0, booklets.height)
                 )
-                blank.mergeRotatedScaledTranslatedPage(
-                    page2, -90, scale, 0, booklets.height / 2, expand=True
+                blank.merge_page(page1, expand=True)
+                page2.add_transformation(
+                    Transformation()
+                    .rotate(-90)
+                    .scale(scale)
+                    .translate(0, booklets.height / 2)
                 )
+                blank.merge_page(page2, expand=True)
             new_pages.append(blank)
         pages.clear()
         pages.extend(new_pages)

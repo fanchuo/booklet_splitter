@@ -1,4 +1,4 @@
-import unittest
+import pytest
 import importlib.resources
 from .. import resources
 from booklet_splitter import booklets, volumes
@@ -23,22 +23,19 @@ def analyze_split(tmp: str) -> str:
     return split_result.strip()
 
 
-class TestBookletSplitter(unittest.TestCase):
+class TestBookletSplitter:
     def test_simple(self):
         with TemporaryDirectory() as tmp:
             booklets.generate_booklets(input_pdf=pdf_path, target_directory=str(tmp))
             split_result = analyze_split(tmp)
 
-        self.assertEqual(
-            split_result,
-            """booklet01.pdf
+        assert split_result == """booklet01.pdf
 1
 2
 10   3
 4   9
 8   5
-6   7""",
-        )
+6   7"""
 
     def test_2booklets(self):
         with TemporaryDirectory() as tmp:
@@ -47,9 +44,7 @@ class TestBookletSplitter(unittest.TestCase):
             )
             split_result = analyze_split(tmp)
 
-        self.assertEqual(
-            split_result,
-            """booklet01.pdf
+        assert split_result == """booklet01.pdf
 8   1
 2   7
 6   3
@@ -57,8 +52,7 @@ class TestBookletSplitter(unittest.TestCase):
 
 booklet02.pdf
 9
-10""",
-        )
+10"""
 
     def test_cover(self):
         with TemporaryDirectory() as tmp:
@@ -67,9 +61,7 @@ booklet02.pdf
             )
             split_result = analyze_split(tmp)
 
-        self.assertEqual(
-            split_result,
-            """booklet01.pdf
+        assert split_result == """booklet01.pdf
 6
 5
 4   1
@@ -79,8 +71,7 @@ booklet02.pdf
 7
 8
 9
-10""",
-        )
+10"""
 
     def test_layout(self):
         with TemporaryDirectory() as tmp:
@@ -89,9 +80,7 @@ booklet02.pdf
             )
             split_result = analyze_split(tmp)
 
-        self.assertEqual(
-            split_result,
-            """booklet01.pdf
+        assert split_result == """booklet01.pdf
 1
 2
 3
@@ -101,8 +90,7 @@ booklet02.pdf
 7
 8
 9
-10""",
-        )
+10"""
 
     def test_volumes(self):
         with TemporaryDirectory() as tmp:
@@ -111,9 +99,7 @@ booklet02.pdf
             )
             split_result = analyze_split(tmp)
 
-        self.assertEqual(
-            split_result,
-            """volume01.pdf
+        assert split_result == """volume01.pdf
 1
 2
 3
@@ -125,17 +111,16 @@ volume02.pdf
 7
 8
 9
-10""",
-        )
+10"""
 
-    @unittest.expectedFailure
+    @pytest.mark.xfail(strict=True)
     def test_not_multiple4(self):
         with TemporaryDirectory() as tmp:
             booklets.generate_booklets(
                 input_pdf=pdf_path, target_directory=str(tmp), max_size=7
             )
 
-    @unittest.expectedFailure
+    @pytest.mark.xfail(strict=True)
     def test_not_positive(self):
         with TemporaryDirectory() as tmp:
             booklets.generate_booklets(

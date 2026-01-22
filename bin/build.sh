@@ -23,7 +23,7 @@ if [ ! -z "${GITHUB_REF+x}" ] ; then
   VERSION=$(echo "$GITHUB_REF" | sed -n -e 's/^refs\/tags\/v\([0-9]\+[.0-9]*\)$/\1/ p')
 fi
 if [ -z "$VERSION" ] ; then
-  VERSION=dev
+  unset VERSION
 fi
 
 while [ $# -gt 0 ] ; do
@@ -44,10 +44,7 @@ while [ $# -gt 0 ] ; do
       ;;
     cover)
       ensure_installed_tests
-      coverage run --source src/ setup.py test
-      coverage report
-      coverage html
-      coverage xml
+      pytest --cov=src/ --cov-report=html --cov-report=xml
       ;;
     flake8)
       ensure_installed_tests
