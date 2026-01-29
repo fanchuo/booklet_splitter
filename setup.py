@@ -20,7 +20,7 @@ setup(
     package_dir={"": "src"},
     packages=find_namespace_packages(where="src"),
     install_requires=[
-        "pypdf==6.6.0",
+        "pypdf==6.6.2",
         "click==8.3.1",
     ],
     scripts=["scripts/pdf_splitter"],

@@ -30,7 +30,7 @@ while [ $# -gt 0 ] ; do
   case "$1" in
     test)
       ensure_installed
-      python setup.py test
+      pytest
       ;;
     package)
       python setup.py bdist_wheel
